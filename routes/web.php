@@ -11,6 +11,13 @@
 |
 */
 
-$router->get('/', function () use ($router) {
-    return $router->app->version();
+$router->post('register', 'AuthController@register');
+$router->post('login', 'AuthController@login');
+
+$router->group(['prefix' => 'products', 'middleware' => 'auth'], function () use ($router) {
+    $router->put('/{id}', 'ProductController@update');
+    $router->get('/get-list', 'ProductController@getList');
+    $router->post('/', 'ProductController@store');
+    $router->get('/{id}', 'ProductController@show');
+    $router->delete('/{id}', 'ProductController@destroy');
 });
