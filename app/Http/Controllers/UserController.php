@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Product;
+use App\User;
 use Illuminate\Validation\ValidationException;
 
-class ProductController extends Controller
+class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -19,20 +19,20 @@ class ProductController extends Controller
         $skip = $request->query('skip', 0);
         $search = $request->query('search', '');
 
-        $query = Product::query();
+        $query = User::query();
 
         if ($search) {
-            $query->where('name', 'like', '%' . $search . '%');
+            $query->where('email', 'like', '%' . $search . '%')->orWhere('role', 'like', '%' . $search . '%');
         }
 
         $query->take($take)->skip($skip);
 
-        $products = $query->get();
+        $users = $query->get();
 
         return response()->json([
             'code' => 200,
-            'message' => 'Products retrieved successfully.',
-            'data' => $products,
+            'message' => 'Users retrieved successfully.',
+            'data' => $users,
         ], 200);
     }
 
@@ -45,21 +45,23 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'name' => 'required|string|unique:products',
-            'qty' => 'required|integer',
+            'email' => 'required|string|unique:users',
+            'password' => 'password',
+            'confirm_password' => 'required|same:password',
+            'role' => 'required',
         ]);
 
         try {
-            $product = Product::create([
-                'name' => $request->name,
-                'description' => $request->description,
-                'qty' => $request->qty,
+            $user = User::create([
+                'email' => $request->email,
+                'password' => $request->password,
+                'role' => $request->role,
             ]);
 
             return response()->json([
                 'code' => 201,
-                'message' => 'Product created successfully.',
-                'data' => $product,
+                'message' => 'User created successfully.',
+                'data' => $user,
             ], 201);
         } catch (ValidationException $e) {
             return response()->json([
@@ -84,17 +86,17 @@ class ProductController extends Controller
     public function show($id)
     {
         try {
-            $product = Product::findOrFail($id);
+            $user = User::findOrFail($id);
 
             return response()->json([
                 'code' => 200,
-                'message' => 'Product retrieved successfully',
-                'data' => $product,
+                'message' => 'User retrieved successfully',
+                'data' => $user,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'code' => 404,
-                'message' => 'Product not found.',
+                'message' => 'User not found.',
             ], 404);
         }
     }
@@ -110,22 +112,24 @@ class ProductController extends Controller
     {
         try {
             $this->validate($request, [
-                'name' => 'required|unique:products,name,' . $id,
-                'qty' => 'required|integer',
+                'email' => 'required|unique:users,email,' . $id,
+                'password' => 'password',
+                'confirm_password' => 'required|same:password',
+                'role' => 'required',
             ]);
 
-            $product = Product::findOrFail($id);
+            $user = User::findOrFail($id);
 
-            $product->update([
-                'name' => $request->name,
-                'description' => $request->description,
-                'qty' => $request->qty,
+            $user->update([
+                'email' => $request->email,
+                'password' => $request->password,
+                'role' => $request->role,
             ]);
 
             return response()->json([
                 'code' => 200,
-                'message' => 'Product updated successfully.',
-                'data' => $product,
+                'message' => 'User updated successfully.',
+                'data' => $user,
             ]);
         } catch (ValidationException $e) {
             return response()->json([
@@ -145,17 +149,17 @@ class ProductController extends Controller
     public function destroy($id)
     {
         try {
-            $product = Product::findOrFail($id);
-            $product->delete();
+            $user = User::findOrFail($id);
+            $user->delete();
 
             return response()->json([
                 'code' => 200,
-                'message' => 'Product deleted successfully.',
+                'message' => 'User deleted successfully.',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'code' => 404,
-                'message' => 'Product not found.',
+                'message' => 'User not found.',
             ], 404);
         }
     }

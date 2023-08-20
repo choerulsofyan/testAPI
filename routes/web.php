@@ -21,3 +21,12 @@ $router->group(['prefix' => 'products', 'middleware' => 'auth'], function () use
     $router->get('/{id}', 'ProductController@show');
     $router->delete('/{id}', 'ProductController@destroy');
 });
+
+
+$router->group(['prefix' => 'users', 'middleware' => 'auth'], function () use ($router) {
+    $router->put('/{id}', 'userController@update');
+    $router->get('/get-list', 'userController@getList');
+    $router->post('/', 'userController@store');
+    $router->get('/{id}', 'userController@show');
+    $router->delete('/{id}', 'userController@destroy');
+});
